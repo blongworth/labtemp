@@ -1,13 +1,14 @@
 library(ggplot2)
 library(dplyr)
+#library(plotly)
 
 file <- "/home/brett/labtemp"
-data <- read.csv(file, col.names=c("ts","temp","rh"))
-data$ts <- as.POSIXct(data$ts, origin="1970-01-01")
 
 server <- function(input, output) {
   
   tempdata <- reactive({
+    data <- read.csv(file, col.names=c("ts","temp","rh"))
+    data$ts <- as.POSIXct(data$ts, origin="1970-01-01")
     # Due to dplyr issue #318, we need temp variables for input values
     mindate <- input$date[1]
     maxdate <- input$date[2]
@@ -23,40 +24,39 @@ server <- function(input, output) {
     
   }) 
   
-  output$tempPlot <- renderPlot({
-    ggplot(tempdata(), aes(ts, temp)) + 
-      geom_smooth() +
-      geom_line() + 
-      ggtitle("USAMS Lab Temperature") +
-      ylab("Temperature (F)") +
-      theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-      theme(axis.title.y = element_text(size=16), 
-            axis.text.y  = element_text(size=12))
-  })
+  #output$st <- tempdata()[1,1]
   
-  output$rhPlot <- renderPlot({
-    ggplot(tempdata(), aes(ts, rh)) + 
-      geom_smooth() +
-      geom_line() + 
-      ggtitle("USAMS Lab Humidity") +
-      ylab("Humidity (%)") +
-      theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-      theme(axis.title.y = element_text(size=16), 
-            axis.text.y  = element_text(size=12))
+  output$tempPlotly <- renderPlotly({
+    p <- plot_ly(tempdata(), x = ts, y = temp)
+    p
+    #p %>%
+    #  add_trace(y = fitted(loess(temp ~ ts))) %>%
+    #  layout(title = "NOSAMS lab temperature",
+    #         showlegend = FALSE) 
+  })
+  output$rhPlotly <- renderPlotly({
+    p <- plot_ly(tempdata(), x = ts, y = rh)
+    p
   })
 }
 
 ui <- fluidPage(
+  # Application title
+  titlePanel("NOSAMS Lab Temperature"),
   sidebarLayout(
     sidebarPanel(
       dateRangeInput('date',
                      label = 'Date Range',
-                     start = as.Date(data[1,1]), 
+                     #start = as.Date(output$st), 
+                     start = (Sys.Date() - 5),
                      end = Sys.Date(),
                      max = Sys.Date())
+#      sliderInput('smooth',
+#                  label = 'Smoothing',
+#                  0, 10, value = 1)
     ),
-    mainPanel(plotOutput("tempPlot"),
-              plotOutput("rhPlot"))
+    mainPanel(plotlyOutput("tempPlotly"),
+              plotlyOutput("rhPlotly"))
     
   )
 )
