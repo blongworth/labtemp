@@ -1,7 +1,8 @@
 library(ggplot2)
 library(dplyr)
 
-data <- read.csv("~/labtemp", col.names=c("ts","temp","rh"))
+file <- "/home/brett/labtemp"
+data <- read.csv(file, col.names=c("ts","temp","rh"))
 data$ts <- as.POSIXct(data$ts, origin="1970-01-01")
 
 server <- function(input, output) {
@@ -23,7 +24,25 @@ server <- function(input, output) {
   }) 
   
   output$tempPlot <- renderPlot({
-    qplot(ts, temp, data=tempdata())
+    ggplot(tempdata(), aes(ts, temp)) + 
+      geom_smooth() +
+      geom_line() + 
+      ggtitle("USAMS Lab Temperature") +
+      ylab("Temperature (F)") +
+      theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+      theme(axis.title.y = element_text(size=16), 
+            axis.text.y  = element_text(size=12))
+  })
+  
+  output$rhPlot <- renderPlot({
+    ggplot(tempdata(), aes(ts, rh)) + 
+      geom_smooth() +
+      geom_line() + 
+      ggtitle("USAMS Lab Humidity") +
+      ylab("Humidity (%)") +
+      theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+      theme(axis.title.y = element_text(size=16), 
+            axis.text.y  = element_text(size=12))
   })
 }
 
@@ -36,7 +55,9 @@ ui <- fluidPage(
                      end = Sys.Date(),
                      max = Sys.Date())
     ),
-    mainPanel(plotOutput("tempPlot"))
+    mainPanel(plotOutput("tempPlot"),
+              plotOutput("rhPlot"))
+    
   )
 )
 
