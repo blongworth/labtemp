@@ -1,6 +1,6 @@
-library(ggplot2)
+#library(ggplot2)
 library(dplyr)
-#library(plotly)
+library(plotly)
 
 file <- "/home/brett/labtemp"
 
