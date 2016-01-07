@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# Read temp and RH from Omega iTHX
+
 ts=$(date +%s)
 temp=$(printf "*SRTF\r" | nc thdcfams 2000)
 sleep .5
