@@ -5,9 +5,12 @@ import socket
 import errno
 import sqlite3
 from time import sleep, time
+import csv
+
 
 host = 'thdcfams'
 db = '/home/brett/Projects/labtemp/labtemp.db'
+ltfile = '/home/brett/labtemp.test'
 
 
 def netcat(hostname, port, content):
@@ -28,17 +31,38 @@ def netcat(hostname, port, content):
     s.close()
 
 
+def readiServer(hostname):
+    """Get temperature and humidity from hostname
+
+    return list"""
+    
+    temp = netcat(hostname, 2000, "*SRTF\r")
+    temp = temp[1:-1]
+    sleep(0.5)
+    rh = netcat(hostname, 2000, "*SRH\r")
+    rh = rh[1:-1]
+    return [temp, rh]
+
+    
 if __name__ == '__main__':
 
+    # get the data
     ts = int(time())
-    temp = netcat(host, 2000, "*SRTF\r")
-    sleep(0.5)
-    rh = netcat(host, 2000, "*SRH\r")
+    data = readiServer(host)
 
+    # write to file
+    f = open(ltfile, "a")
+    try:
+        w = csv.writer(f, quoting=csv.QUOTE_NONE)
+        w.writerow( (ts, data[0], data[1]) )
+    finally:
+        f.close()
+
+    # write to db
     try:
         conn = sqlite3.connect(db)
         c = conn.cursor()
-        c.execute("INSERT INTO test VALUES (?, ?, ?)", (ts, temp, rh))
+        c.execute("INSERT INTO test VALUES (?, ?, ?)", (ts, data[0], data[1]))
         conn.commit()
 
     except sqlite3.Error as e:
