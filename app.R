@@ -1,33 +1,32 @@
-#library(ggplot2)
+# shiny app to plot lab temperature data from file or db
+
 library(dplyr)
 library(plotly)
 
-file <- "/home/brett/labtemp"
+db <- "/home/brett/Projects/labtemp/labtemp.db"
 
 server <- function(input, output) {
   
   tempdata <- reactive({
-    data <- read.csv(file, col.names=c("ts","temp","rh"))
-    data$ts <- as.POSIXct(data$ts, origin="1970-01-01")
-    
+    labtemp <- src_sqlite(db)
+    data <- tbl(labtemp, "temp")
+    begin <- as.numeric(as.POSIXlt(as.Date(input$date[1])))
+    end <- as.numeric(as.POSIXlt(as.Date(input$date[2])))
     # Apply filters
-    m <- data %>%
-      filter(
-        as.Date(ts) >= as.Date(input$date[1]),
-        as.Date(ts) <= as.Date(input$date[2])
-      ) 
+    m <- filter(data, ts >= begin, ts <= end)
     
-    as.data.frame(m)
-    
+    m <- collect(m)
+    m[m == 0] <- NA
+    m
   }) 
   
   output$tempPlotly <- renderPlotly({
-    p <- plot_ly(tempdata(), x = ts, y = temp)
-    p
+    p <- plot_ly(tempdata(), x = as.POSIXlt(ts, origin = '1970-01-01'), y = temp)
+    layout(p, xaxis = list(title = ""))
   })
   output$rhPlotly <- renderPlotly({
-    p <- plot_ly(tempdata(), x = ts, y = rh)
-    p
+    p <- plot_ly(tempdata(), x = as.POSIXlt(ts, origin = '1970-01-01'), y = rh)
+    layout(p, xaxis = list(title = ""))
   })
 }
 
