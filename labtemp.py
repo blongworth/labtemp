@@ -10,7 +10,7 @@ import csv
 
 host = 'thdcfams'
 db = '/home/brett/Projects/labtemp/labtemp.db'
-ltfile = '/home/brett/labtemp.test'
+ltfile = '/home/brett/labtemp'
 
 
 def netcat(hostname, port, content):
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     try:
         conn = sqlite3.connect(db)
         c = conn.cursor()
-        c.execute("INSERT INTO test VALUES (?, ?, ?)", (ts, data[0], data[1]))
+        c.execute("INSERT INTO temp VALUES (?, ?, ?)", (ts, data[0], data[1]))
         conn.commit()
 
     except sqlite3.Error as e:

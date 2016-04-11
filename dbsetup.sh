@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Run this to create labtemp db and read in labtemp csv file
+# Run this to create labtemp db
 
-cat ./dbsetup.txt | sqlite3 labtemp.db
-CREATE TABLE temp (
-ts int primary key,
-temp int,
-rh int
-);
+echo "CREATE TABLE test2 ( ts int primary key, temp int, rh int);" | sqlite3 labtemp.db
