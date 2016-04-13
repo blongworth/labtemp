@@ -1,6 +1,6 @@
 # shiny app to plot lab temperature data from file or db
 
-library(dplyr)
+library(dplyr, warn.conflicts = FALSE)
 library(plotly)
 
 db <- "/home/brett/Projects/labtemp/labtemp.db"
