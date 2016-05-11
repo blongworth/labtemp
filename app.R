@@ -20,6 +20,15 @@ server <- function(input, output) {
     m
   }) 
   
+  output$status <- renderText({
+    labtemp <- src_sqlite(db)
+    data <- tbl(labtemp, "temp")
+    m <- filter(data, ts == max(ts))
+    m <- collect(m)
+    sprintf("Time: %s\nCurrent Temperature: %.1f\nCurrent Humidity: %.0f", 
+	    as.POSIXlt(m$ts, origin = '1970-01-01'), m$temp, m$rh)
+  })
+	  
   output$tempPlotly <- renderPlotly({
     p <- plot_ly(tempdata(), x = as.POSIXlt(ts, origin = '1970-01-01'), y = temp)
     layout(p, xaxis = list(title = ""))
@@ -41,7 +50,8 @@ ui <- fluidPage(
                      end = Sys.Date(),
                      max = Sys.Date())
     ),
-    mainPanel(plotlyOutput("tempPlotly"),
+    mainPanel(textOutput("status"),
+	      plotlyOutput("tempPlotly"),
               plotlyOutput("rhPlotly"))
     
   )
