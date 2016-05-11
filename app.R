@@ -13,16 +13,14 @@ server <- function(input, output) {
   tempdata <- reactive({
     begin <- as.numeric(as.POSIXct(input$date[1]))
     end <- as.numeric(as.POSIXct(input$date[2] + 1))
-	conn <- dbConnect(SQLite(), dbname = db)
-	sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') AS ts,
-		temp, rh
-		FROM temp
-    WHERE ts >=", begin,"
-    AND ts <=", end)
-	
-	m <- dbGetQuery(conn, sql)
-	dbDisconnect(conn)
-    
+  	conn <- dbConnect(SQLite(), dbname = db)
+  	sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') AS ts,
+  		temp, rh
+  		FROM temp
+      WHERE ts >=", begin,"
+      AND ts <=", end)
+  	m <- dbGetQuery(conn, sql)
+  	dbDisconnect(conn)
     m[m == 0] <- NA
     m
   }) 
@@ -34,8 +32,8 @@ server <- function(input, output) {
 		FROM temp"
 	t <- dbGetQuery(conn, sql)
 	dbDisconnect(conn)
-	sprintf("Time: %s\nCurrent Temperature: %.1f\nCurrent Humidity: %.0f", 
-	t$ts, t$temp, t$rh)
+	sprintf("Current Temperature: %.1f\nCurrent Humidity: %.0f", 
+	t$temp, t$rh)
   })
 	  
   output$tempPlotly <- renderPlotly({
