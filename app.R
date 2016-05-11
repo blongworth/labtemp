@@ -4,14 +4,15 @@ library(dplyr, warn.conflicts = FALSE)
 library(plotly)
 library(DBI)
 library(RSQLite)
-# This connection creates an empty database if it does not exist
+
+# Labtemp sqlite DB
 db <- "./labtemp.db"
 
 server <- function(input, output) {
   
   tempdata <- reactive({
-    begin <- as.numeric(as.POSIXlt(as.Date(input$date[1])))
-    end <- as.numeric(as.POSIXlt(as.Date(input$date[2])))
+    begin <- as.numeric(as.POSIXct(input$date[1]))
+    end <- as.numeric(as.POSIXct(input$date[2] + 1))
 	conn <- dbConnect(SQLite(), dbname = db)
 	sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') AS ts,
 		temp, rh
