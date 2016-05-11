@@ -10,14 +10,18 @@ db <- "./labtemp.db"
 server <- function(input, output) {
   
   tempdata <- reactive({
-    labtemp <- src_sqlite(db)
-    data <- tbl(labtemp, "temp")
     begin <- as.numeric(as.POSIXlt(as.Date(input$date[1])))
     end <- as.numeric(as.POSIXlt(as.Date(input$date[2])))
-    # Apply filters
-    m <- filter(data, ts >= begin, ts <= end)
+	conn <- dbConnect(SQLite(), dbname = db)
+	sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') AS ts,
+		temp, rh
+		FROM temp
+    WHERE ts >=", begin,"
+    AND ts <=", end)
+	
+	m <- dbGetQuery(conn, sql)
+	dbDisconnect(conn)
     
-    m <- collect(m)
     m[m == 0] <- NA
     m
   }) 
