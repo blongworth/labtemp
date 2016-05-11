@@ -2,8 +2,10 @@
 
 library(dplyr, warn.conflicts = FALSE)
 library(plotly)
-
-db <- "/home/brett/Projects/labtemp/labtemp.db"
+library(DBI)
+library(RSQLite)
+# This connection creates an empty database if it does not exist
+db <- "./labtemp.db"
 
 server <- function(input, output) {
   
@@ -21,12 +23,14 @@ server <- function(input, output) {
   }) 
   
   output$status <- renderText({
-    labtemp <- src_sqlite(db)
-    data <- tbl(labtemp, "temp")
-    m <- filter(data, ts == max(ts))
-    m <- collect(m)
-    sprintf("Time: %s\nCurrent Temperature: %.1f\nCurrent Humidity: %.0f", 
-	    as.POSIXlt(m$ts, origin = '1970-01-01'), m$temp, m$rh)
+	conn <- dbConnect(SQLite(), dbname = db)
+	sql <- "SELECT datetime(max(ts), 'unixepoch', 'localtime') AS ts,
+		temp, rh
+		FROM temp"
+	t <- dbGetQuery(conn, sql)
+	dbDisconnect(conn)
+	sprintf("Time: %s\nCurrent Temperature: %.1f\nCurrent Humidity: %.0f", 
+	t$ts, t$temp, t$rh)
   })
 	  
   output$tempPlotly <- renderPlotly({
