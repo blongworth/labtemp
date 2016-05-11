@@ -6,7 +6,7 @@ library(DBI)
 library(RSQLite)
 
 # Labtemp sqlite DB
-db <- "./labtemp.db"
+db <- "/home/brett/Projects/labtemp/labtemp.db"
 
 server <- function(input, output) {
   
