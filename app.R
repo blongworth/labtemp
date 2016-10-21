@@ -11,7 +11,7 @@ db <- "/home/brett/Projects/labtemp/labtemp.db"
 server <- function(input, output) {
   
   tempdata <- reactive({
-    begin <- as.numeric(as.POSIXct(input$date[1]))
+begin <- as.numeric(as.POSIXct(input$date[1]))
     end <- as.numeric(as.POSIXct(input$date[2] + 1))
   	conn <- dbConnect(SQLite(), dbname = db)
   	sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') AS ts,
@@ -37,11 +37,11 @@ server <- function(input, output) {
   })
 	  
   output$tempPlotly <- renderPlotly({
-    p <- plot_ly(tempdata(), x = as.POSIXlt(ts, origin = '1970-01-01'), y = temp)
+    plot_ly(tempdata(), x = ~ts, y = ~temp, type = "scatter", mode = "lines") %>%
     layout(p, xaxis = list(title = ""))
   })
   output$rhPlotly <- renderPlotly({
-    p <- plot_ly(tempdata(), x = as.POSIXlt(ts, origin = '1970-01-01'), y = rh)
+    plot_ly(tempdata(), x = ~ts, y = ~rh, type = "scatter", mode = "lines") %>%
     layout(p, xaxis = list(title = ""))
   })
 }
