@@ -4,6 +4,7 @@ library(dplyr, warn.conflicts = FALSE)
 library(plotly)
 library(DBI)
 library(RSQLite)
+library(lubridate)
 
 # Labtemp sqlite DB
 db <- "/home/brett/Projects/labtemp/labtemp.db"
@@ -22,6 +23,7 @@ date <- c('2016-10-17','2016-10-18')
   	m <- dbGetQuery(conn, sql)
   	dbDisconnect(conn)
     m[m == 0] <- NA
+  	m$ts <-ymd_hms(m$ts)
   
 	conn <- dbConnect(SQLite(), dbname = db)
 	sql <- "SELECT datetime(max(ts), 'unixepoch', 'localtime') AS ts,

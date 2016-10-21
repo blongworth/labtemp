@@ -4,6 +4,7 @@ library(dplyr, warn.conflicts = FALSE)
 library(plotly)
 library(DBI)
 library(RSQLite)
+library(lubridate)
 
 # Labtemp sqlite DB
 db <- "/home/brett/Projects/labtemp/labtemp.db"
@@ -22,6 +23,7 @@ begin <- as.numeric(as.POSIXct(input$date[1]))
   	m <- dbGetQuery(conn, sql)
   	dbDisconnect(conn)
     m[m == 0] <- NA
+  	m$ts <-ymd_hms(m$ts)
     m
   }) 
   
@@ -38,11 +40,11 @@ begin <- as.numeric(as.POSIXct(input$date[1]))
 	  
   output$tempPlotly <- renderPlotly({
     plot_ly(tempdata(), x = ~ts, y = ~temp, type = "scatter", mode = "lines") %>%
-    layout(p, xaxis = list(title = ""))
+    layout(xaxis = list(title = ""))
   })
   output$rhPlotly <- renderPlotly({
     plot_ly(tempdata(), x = ~ts, y = ~rh, type = "scatter", mode = "lines") %>%
-    layout(p, xaxis = list(title = ""))
+    layout(xaxis = list(title = ""))
   })
 }
 
