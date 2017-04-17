@@ -9,7 +9,7 @@ library(lubridate)
 # Labtemp sqlite DB
 db <- "/home/brett/Projects/labtemp/labtemp.db"
 
-date <- c('2016-10-17','2016-10-18')
+date <- c('2016-12-17','2017-01-18')
   
     begin <- as.numeric(as.POSIXct(date[1]))
     end <- as.numeric(as.POSIXct(date[2]))
