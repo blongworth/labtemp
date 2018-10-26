@@ -1,10 +1,10 @@
 # shiny app to plot lab temperature data from file or db
 
 library(dplyr, warn.conflicts = FALSE)
-library(plotly)
+library(plotly, warn.conflicts = FALSE)
 library(DBI)
 library(RSQLite)
-library(lubridate)
+library(lubridate, warn.conflicts = FALSE)
 
 # Labtemp sqlite DB
 db <- "/home/brett/Projects/labtemp/labtemp.db"
