@@ -10,40 +10,52 @@ library(lubridate, warn.conflicts = FALSE)
 db <- "/home/brett/Projects/labtemp/labtemp.db"
 
 server <- function(input, output) {
-  
+
   tempdata <- reactive({
-begin <- as.numeric(as.POSIXct(input$date[1]))
+    begin <- as.numeric(as.POSIXct(input$date[1]))
     end <- as.numeric(as.POSIXct(input$date[2] + 1))
-  	conn <- dbConnect(SQLite(), dbname = db)
-  	sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') AS ts,
-  		temp, rh
-  		FROM temp
-      WHERE ts >=", begin,"
-      AND ts <=", end)
-  	m <- dbGetQuery(conn, sql)
-  	dbDisconnect(conn)
+    conn <- dbConnect(SQLite(), dbname = db)
+    sql <- paste("SELECT datetime(ts, 'unixepoch', 'localtime') 
+                  AS ts, temp, rh
+                  FROM temp
+                  WHERE ts >=", begin,"
+                  AND ts <=", end)
+    m <- dbGetQuery(conn, sql)
+    dbDisconnect(conn)
     m[m == 0] <- NA
-  	m$ts <-ymd_hms(m$ts)
+    m$ts <-ymd_hms(m$ts)
     m
-  }) 
-  
-  output$status <- renderText({
-	conn <- dbConnect(SQLite(), dbname = db)
-	sql <- "SELECT datetime(max(ts), 'unixepoch', 'localtime') AS ts,
-		temp, rh
-		FROM temp"
-	t <- dbGetQuery(conn, sql)
-	dbDisconnect(conn)
-	sprintf("Current Temperature: %.1f\nCurrent Humidity: %.0f", 
-	t$temp, t$rh)
   })
-	  
+
+  # Current temp and humidity
+  output$status <- renderText({
+    conn <- dbConnect(SQLite(), dbname = db)
+    sql <- "SELECT datetime(max(ts), 'unixepoch', 'localtime')
+            AS ts, temp, rh 
+            FROM temp"
+    t <- dbGetQuery(conn, sql)
+    dbDisconnect(conn)
+    sprintf("Current Temperature: %.1f\nCurrent Humidity: %.0f", 
+            t$temp, t$rh)
+  })
+  
+  # Temp plot
   output$tempPlotly <- renderPlotly({
-    plot_ly(tempdata(), x = ~ts, y = ~temp, type = "scatter", mode = "lines") %>%
+    plot_ly(tempdata(), 
+	    x = ~ts, 
+	    y = ~temp, 
+	    type = "scatter", 
+	    mode = "lines") %>%
     layout(xaxis = list(title = ""))
   })
+  
+  # Humidity plot
   output$rhPlotly <- renderPlotly({
-    plot_ly(tempdata(), x = ~ts, y = ~rh, type = "scatter", mode = "lines") %>%
+    plot_ly(tempdata(), 
+	    x = ~ts, 
+	    y = ~rh, 
+	    type = "scatter", 
+	    mode = "lines") %>%
     layout(xaxis = list(title = ""))
   })
 }
@@ -60,9 +72,9 @@ ui <- fluidPage(
                      max = Sys.Date())
     ),
     mainPanel(textOutput("status"),
-	      plotlyOutput("tempPlotly"),
-              plotlyOutput("rhPlotly"))
-    
+              plotlyOutput("tempPlotly"),
+              plotlyOutput("rhPlotly")
+    )
   )
 )
 
