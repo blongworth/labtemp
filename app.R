@@ -35,6 +35,7 @@ server <- function(input, output) {
             FROM temp"
     t <- dbGetQuery(conn, sql)
     dbDisconnect(conn)
+    t[t == 0] <- NA
     sprintf("Current Temperature: %.1f\nCurrent Humidity: %.0f", 
             t$temp, t$rh)
   })
